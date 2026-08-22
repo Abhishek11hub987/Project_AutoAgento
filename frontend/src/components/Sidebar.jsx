@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { to: '/dashboard/files', icon: Folder, label: 'Files' },
 ];
 
-import { Code, Briefcase, HelpCircle } from 'lucide-react';
+import { Code, Briefcase } from 'lucide-react';
 
 const BOTTOM_ITEMS = [
   { to: '#', icon: Settings, label: 'Settings' },

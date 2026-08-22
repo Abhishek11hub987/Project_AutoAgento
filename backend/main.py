@@ -26,6 +26,13 @@ if sentry_dsn:
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Auto-seed the database if it's empty (crucial for Render deployments using ephemeral SQLite)
+try:
+    from seed import seed_database
+    seed_database()
+except Exception as e:
+    print(f"Error seeding database: {e}")
+
 app = FastAPI(title="AutoAgento API")
 
 # Configure CORS

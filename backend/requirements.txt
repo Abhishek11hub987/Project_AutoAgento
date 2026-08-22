@@ -21,3 +21,4 @@ pandas
 openpyxl
 sentry-sdk[fastapi]
 psycopg2-binary
+protobuf==3.20.3

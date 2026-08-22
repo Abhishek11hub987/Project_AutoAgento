@@ -45,7 +45,7 @@ class LLMService:
         elif fallback_level <= 1 and self.groq_client:
             try:
                 completion = self.groq_client.chat.completions.create(
-                    model="llama3-8b-8192", # Changed from groq/compound which might be invalid
+                    model="llama-3.1-8b-instant", # Changed from llama3-8b-8192 which might be invalid
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message}
@@ -97,7 +97,7 @@ class LLMService:
         elif fallback_level <= 1 and self.groq_client:
             try:
                 stream = self.groq_client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model="llama-3.1-8b-instant",
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message}

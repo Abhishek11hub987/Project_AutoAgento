@@ -36,7 +36,8 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
     }
 
     try {
-      const agentIdNormalized = agentId === '1' ? 'priya' : agentId === '2' ? 'rohit' : agentId === '3' ? 'anjali' : 'priya';
+      const strAgentId = String(agentId);
+      const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rohit' : strAgentId === '3' ? 'anjali' : 'priya';
       
       const response = await fetch(`${API_URL}/api/chat/stream`, {
         method: 'POST',

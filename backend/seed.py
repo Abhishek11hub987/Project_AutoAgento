@@ -69,6 +69,20 @@ def seed_database():
             performance_score=5.0,
             outcomes_delivered=0,
             is_hired=True
+        ),
+        Agent(
+            user_id=user.id,
+            name="Rohit",
+            role="Data Analyst",
+            domain="data",
+            color="var(--accent-emerald)",
+            avatar_emoji="👨‍💻",
+            certifications=["Excel Automation", "Python Pandas", "MIS Reports"],
+            autonomy_level=2,
+            status="online",
+            performance_score=5.0,
+            outcomes_delivered=0,
+            is_hired=True
         )
     ]
     

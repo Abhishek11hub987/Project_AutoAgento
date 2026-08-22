@@ -141,4 +141,64 @@ class LLMService:
                 print(f"Ollama Error in stream: {e}")
                 yield f"data: {json.dumps({'text': 'System Error: Unable to connect to any reasoning engines.'})}\n\n"
 
+    def generate_response_with_tools(self, system_prompt: str, messages: list, tools: list):
+        """
+        messages: [{"role": "user", "content": "..."}, {"role": "model", "content": "..."}, ...]
+        tools: [list of python functions]
+        """
+        if not self.gemini_model:
+            return {"type": "text", "text": "Error: Tools are currently only supported with Gemini API. Please set GEMINI_API_KEY."}
+            
+        try:
+            # Convert our message format to Gemini's expected format
+            gemini_messages = []
+            
+            # Insert system prompt into the first user message
+            if messages and messages[0]["role"] == "user":
+                first_msg = f"System: {system_prompt}\n\nUser: {messages[0]['content']}"
+                gemini_messages.append({"role": "user", "parts": [first_msg]})
+                messages_to_process = messages[1:]
+            else:
+                gemini_messages.append({"role": "user", "parts": [f"System: {system_prompt}\n\nUser: hello"]})
+                messages_to_process = messages
+                
+            for msg in messages_to_process:
+                role = "user" if msg["role"] == "user" else "model"
+                content = msg["content"]
+                
+                # Gemini doesn't like empty parts, and we need to handle tool responses
+                if msg.get("type") == "tool_response":
+                    role = "user"
+                    content = f"Tool Response for {msg.get('function_name')}: {msg.get('content')}"
+                
+                gemini_messages.append({"role": role, "parts": [content]})
+
+            response = self.gemini_model.generate_content(
+                gemini_messages,
+                tools=tools
+            )
+            
+            if not response.candidates:
+                return {"type": "text", "text": "Error: Empty response from model."}
+                
+            first_part = response.candidates[0].content.parts[0]
+            
+            if hasattr(first_part, "function_call") and first_part.function_call:
+                fc = first_part.function_call
+                args = {k: v for k, v in fc.args.items()}
+                return {
+                    "type": "tool_call",
+                    "function_name": fc.name,
+                    "args": args
+                }
+            else:
+                return {
+                    "type": "text",
+                    "text": response.text
+                }
+                
+        except Exception as e:
+            print(f"Gemini Tool Error: {e}")
+            return {"type": "text", "text": f"Error executing model with tools: {str(e)}"}
+
 llm_service = LLMService()

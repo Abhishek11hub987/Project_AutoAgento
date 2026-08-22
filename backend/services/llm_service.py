@@ -198,7 +198,74 @@ class LLMService:
                 }
                 
         except Exception as e:
-            print(f"Gemini Tool Error: {e}")
-            return {"type": "text", "text": f"Error executing model with tools: {str(e)}"}
+            print(f"Gemini Tool Error: {e}. Falling back to Groq for tools...")
+            
+            if not self.groq_client:
+                return {"type": "text", "text": f"Error executing model with tools: {str(e)}\n(And Groq fallback is not configured)"}
+                
+            try:
+                import inspect
+                groq_tools = []
+                for tool in tools:
+                    sig = inspect.signature(tool)
+                    properties = {}
+                    required = []
+                    for name, param in sig.parameters.items():
+                        param_type = "string"
+                        if param.annotation == int: param_type = "integer"
+                        elif param.annotation == bool: param_type = "boolean"
+                        
+                        properties[name] = {"type": param_type, "description": f"{name} parameter"}
+                        if param.default == inspect.Parameter.empty: required.append(name)
+                            
+                    groq_tools.append({
+                        "type": "function",
+                        "function": {
+                            "name": tool.__name__,
+                            "description": tool.__doc__.strip() if tool.__doc__ else f"Call {tool.__name__}",
+                            "parameters": {
+                                "type": "object",
+                                "properties": properties,
+                                "required": required
+                            }
+                        }
+                    })
+                
+                # Format messages for Groq
+                groq_messages = [{"role": "system", "content": system_prompt}]
+                for msg in messages:
+                    role = "user" if msg["role"] == "user" else "assistant"
+                    content = msg["content"]
+                    if msg.get("type") == "tool_response":
+                        role = "user"
+                        content = f"Tool Response for {msg.get('function_name')}: {msg.get('content')}"
+                    groq_messages.append({"role": role, "content": content})
+                    
+                completion = self.groq_client.chat.completions.create(
+                    model="llama-3.1-8b-instant", # Groq recommends this for tool calling
+                    messages=groq_messages,
+                    tools=groq_tools,
+                    tool_choice="auto",
+                    temperature=0.3
+                )
+                
+                response_message = completion.choices[0].message
+                
+                if response_message.tool_calls:
+                    tc = response_message.tool_calls[0]
+                    args = json.loads(tc.function.arguments)
+                    return {
+                        "type": "tool_call",
+                        "function_name": tc.function.name,
+                        "args": args
+                    }
+                else:
+                    return {
+                        "type": "text",
+                        "text": response_message.content
+                    }
+            except Exception as groq_e:
+                print(f"Groq Tool Error: {groq_e}")
+                return {"type": "text", "text": f"Both Gemini and Groq failed. Gemini error: {str(e)}. Groq error: {str(groq_e)}"}
 
 llm_service = LLMService()

@@ -1,0 +1,144 @@
+import os
+import json
+import requests
+import google.generativeai as genai
+from groq import Groq
+from dotenv import load_dotenv
+
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+load_dotenv(dotenv_path)
+
+class LLMService:
+    def __init__(self):
+        # Initialize Gemini
+        self.gemini_key = os.getenv("GEMINI_API_KEY")
+        if self.gemini_key and self.gemini_key != "your_google_ai_studio_key_here":
+            genai.configure(api_key=self.gemini_key)
+            self.gemini_model = genai.GenerativeModel('gemini-flash-latest')
+        else:
+            self.gemini_model = None
+            
+        # Initialize Groq as fallback
+        self.groq_key = os.getenv("GROQ_API_KEY")
+        if self.groq_key and self.groq_key != "your_groq_key_here":
+            self.groq_client = Groq(api_key=self.groq_key)
+        else:
+            self.groq_client = None
+            
+        # Initialize Ollama
+        self.ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+    def generate_response(self, system_prompt: str, user_message: str, fallback_level=0) -> str:
+        """
+        Generate a response using Gemini -> Groq -> Ollama
+        """
+        if fallback_level == 0 and self.gemini_model:
+            try:
+                response = self.gemini_model.generate_content([
+                    {"role": "user", "parts": [f"System: {system_prompt}\n\nUser: {user_message}"]}
+                ])
+                return response.text
+            except Exception as e:
+                print(f"Gemini API Error: {e}. Falling back to Groq...")
+                return self.generate_response(system_prompt, user_message, fallback_level=1)
+                
+        elif fallback_level <= 1 and self.groq_client:
+            try:
+                completion = self.groq_client.chat.completions.create(
+                    model="llama3-8b-8192", # Changed from groq/compound which might be invalid
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message}
+                    ],
+                    temperature=0.5,
+                )
+                return completion.choices[0].message.content
+            except Exception as e:
+                print(f"Groq API Error: {e}. Falling back to Ollama...")
+                return self.generate_response(system_prompt, user_message, fallback_level=2)
+                
+        else:
+            # Fallback 2: Ollama Local Model
+            try:
+                response = requests.post(f"{self.ollama_url}/api/chat", json={
+                    "model": "llama3",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message}
+                    ],
+                    "stream": False
+                }, timeout=30)
+                if response.status_code == 200:
+                    return response.json().get("message", {}).get("content", "")
+                else:
+                    raise Exception(f"Ollama returned {response.status_code}")
+            except Exception as e:
+                print(f"Ollama Error: {e}")
+                return "I'm sorry, I am currently unable to connect to any of my reasoning engines (Gemini, Groq, or Ollama). Please check your API keys or ensure Ollama is running."
+
+    def generate_response_stream(self, system_prompt: str, user_message: str, fallback_level=0):
+        """
+        Stream a response using Gemini -> Groq -> Ollama
+        """
+        if fallback_level == 0 and self.gemini_model:
+            try:
+                response = self.gemini_model.generate_content(
+                    [{"role": "user", "parts": [f"System: {system_prompt}\n\nUser: {user_message}"]}],
+                    stream=True
+                )
+                for chunk in response:
+                    yield f"data: {json.dumps({'text': chunk.text})}\n\n"
+                return
+            except Exception as e:
+                print(f"Gemini API Error in stream: {e}. Falling back to Groq...")
+                yield from self.generate_response_stream(system_prompt, user_message, fallback_level=1)
+                return
+                
+        elif fallback_level <= 1 and self.groq_client:
+            try:
+                stream = self.groq_client.chat.completions.create(
+                    model="llama3-8b-8192",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message}
+                    ],
+                    temperature=0.5,
+                    stream=True
+                )
+                for chunk in stream:
+                    content = chunk.choices[0].delta.content
+                    if content:
+                        yield f"data: {json.dumps({'text': content})}\n\n"
+                return
+            except Exception as e:
+                print(f"Groq API Error in stream: {e}. Falling back to Ollama...")
+                yield from self.generate_response_stream(system_prompt, user_message, fallback_level=2)
+                return
+                
+        else:
+            # Fallback 2: Ollama Local Model Streaming
+            try:
+                response = requests.post(f"{self.ollama_url}/api/chat", json={
+                    "model": "llama3",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message}
+                    ],
+                    "stream": True
+                }, stream=True, timeout=30)
+                
+                if response.status_code == 200:
+                    for line in response.iter_lines():
+                        if line:
+                            data = json.loads(line)
+                            content = data.get("message", {}).get("content", "")
+                            if content:
+                                yield f"data: {json.dumps({'text': content})}\n\n"
+                    return
+                else:
+                    raise Exception(f"Ollama returned {response.status_code}")
+            except Exception as e:
+                print(f"Ollama Error in stream: {e}")
+                yield f"data: {json.dumps({'text': 'System Error: Unable to connect to any reasoning engines.'})}\n\n"
+
+llm_service = LLMService()

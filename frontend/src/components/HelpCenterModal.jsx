@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, Mail, MessageSquare, Book, Github, Linkedin, Briefcase, Code } from 'lucide-react';
+import { X, ExternalLink, Mail, MessageSquare, Book, Briefcase, Code } from 'lucide-react';
 
 const HelpCenterModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;

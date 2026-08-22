@@ -13,12 +13,11 @@ const NAV_ITEMS = [
   { to: '/dashboard/files', icon: Folder, label: 'Files' },
 ];
 
-import { Code, Briefcase } from 'lucide-react';
+import { Code, Briefcase, HelpCircle } from 'lucide-react';
 
 const BOTTOM_ITEMS = [
   { to: '#', icon: Settings, label: 'Settings' },
-  { to: 'https://github.com/Abhishek11hub987', icon: Code, label: 'Creator GitHub' },
-  { to: 'https://linkedin.com/in/abhishek', icon: Briefcase, label: 'Creator LinkedIn' },
+  { to: '#', icon: HelpCircle, label: 'Help Center' },
 ];
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
@@ -107,6 +106,24 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </a>
         ))}
       </nav>
+
+      {/* Creator Credits */}
+      {!collapsed && (
+        <div className="px-5 py-3 flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold">Built By</span>
+            <span className="text-xs font-semibold">Abhishek</span>
+          </div>
+          <div className="flex gap-1.5">
+            <a href="https://github.com/Abhishek11hub987" target="_blank" rel="noreferrer" className="w-6 h-6 rounded flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-lime)] hover:text-[var(--accent-lime)] transition-colors" title="GitHub">
+              <Code className="w-3.5 h-3.5" />
+            </a>
+            <a href="https://linkedin.com/in/abhishek" target="_blank" rel="noreferrer" className="w-6 h-6 rounded flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-lime)] hover:text-[var(--accent-lime)] transition-colors" title="LinkedIn">
+              <Briefcase className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* User Profile */}
       <div className={`px-3 py-4 border-t border-[var(--border-subtle)] ${collapsed ? 'flex justify-center' : ''}`}>

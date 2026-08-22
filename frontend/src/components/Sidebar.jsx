@@ -13,9 +13,12 @@ const NAV_ITEMS = [
   { to: '/dashboard/files', icon: Folder, label: 'Files' },
 ];
 
+import { Github, Linkedin } from 'lucide-react';
+
 const BOTTOM_ITEMS = [
   { to: '#', icon: Settings, label: 'Settings' },
-  { to: '#', icon: HelpCircle, label: 'Help Center' },
+  { to: 'https://github.com/Abhishek11hub987', icon: Github, label: 'Creator GitHub' },
+  { to: 'https://linkedin.com/in/abhishek', icon: Linkedin, label: 'Creator LinkedIn' },
 ];
 
 const Sidebar = ({ collapsed, setCollapsed }) => {

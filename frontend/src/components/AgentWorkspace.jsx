@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import ChatPanel from './ChatPanel';
@@ -8,6 +8,7 @@ import { ArrowLeft, SlidersHorizontal, Award } from 'lucide-react';
 
 const AgentWorkspace = () => {
   const navigate = useNavigate();
+  const [activeTasks, setActiveTasks] = useState([]);
   // Mock agent data
   const agent = {
     name: 'Priya',
@@ -117,12 +118,12 @@ const AgentWorkspace = () => {
           
           {/* CENTER COLUMN (50% -> 6 cols) - Chat */}
           <div className="lg:col-span-6">
-            <ChatPanel />
+            <ChatPanel onTaskStart={(task) => setActiveTasks(prev => [...prev, task])} onTaskComplete={(taskId) => setActiveTasks(prev => prev.filter(t => t.id !== taskId))} />
           </div>
           
           {/* RIGHT COLUMN (25% -> 3 cols) - Tasks & Tools */}
-          <div className="lg:col-span-3">
-            <TaskQueue />
+          <div className="lg:col-span-3 space-y-6">
+            <TaskQueue tasks={activeTasks} />
             <ToolsGrid />
           </div>
           

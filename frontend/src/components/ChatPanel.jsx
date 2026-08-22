@@ -8,7 +8,7 @@ const INITIAL_MESSAGES = [
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩‍💼' }) => {
+const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩‍💼', onTaskStart, onTaskComplete }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +30,11 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
     setInput('');
     setIsLoading(true);
 
+    const taskId = Date.now();
+    if (onTaskStart) {
+      onTaskStart({ id: taskId, title: `Processing request`, status: 'running', date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+    }
+
     try {
       const agentIdNormalized = agentId === '1' ? 'priya' : agentId === '2' ? 'rohit' : agentId === '3' ? 'anjali' : 'priya';
       
@@ -45,6 +50,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
       });
       
       setIsLoading(false);
+      if (onTaskComplete) onTaskComplete(taskId);
       
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -54,10 +60,12 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
         id: agentMsgId,
         role: 'agent',
         content: '',
+        toolCalls: [],
         hasApproval: false
       }]);
 
       let fullContent = "";
+      let toolCalls = [];
 
       while (true) {
         const { value, done } = await reader.read();
@@ -68,10 +76,17 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.substring(6));
-              fullContent += data.text;
-              setMessages(prev => prev.map(msg => 
-                msg.id === agentMsgId ? { ...msg, content: fullContent } : msg
-              ));
+              if (data.type === 'tool_call') {
+                toolCalls.push(data.text);
+                setMessages(prev => prev.map(msg => 
+                  msg.id === agentMsgId ? { ...msg, toolCalls: [...toolCalls] } : msg
+                ));
+              } else if (data.text) {
+                fullContent += data.text;
+                setMessages(prev => prev.map(msg => 
+                  msg.id === agentMsgId ? { ...msg, content: fullContent } : msg
+                ));
+              }
             } catch (e) {
               console.error("Error parsing stream JSON", e);
             }
@@ -89,6 +104,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
     } catch (error) {
       console.error('Chat error:', error);
       setIsLoading(false);
+      if (onTaskComplete) onTaskComplete(taskId);
       setMessages(prev => [...prev, {
         id: Date.now() + 1, role: 'agent',
         content: 'I\'m sorry, I am currently unable to connect to my reasoning engine. Please try again later.',
@@ -165,9 +181,19 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
             )}
             {msg.role === 'agent' && (
               <div className="flex flex-col w-full max-w-[85%]">
-                <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)]">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                </div>
+                {msg.toolCalls && msg.toolCalls.map((tc, idx) => (
+                  <div key={idx} className="mb-2 px-3 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium flex items-center gap-2 max-w-fit">
+                    <div className="w-1.5 h-1.5 bg-[var(--accent-lime)] rounded-full animate-pulse" />
+                    {tc.replace('\\n', '')}
+                  </div>
+                ))}
+                
+                {msg.content && (
+                  <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)]">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                )}
+
                 {msg.hasApproval && (
                   <div className="mt-2 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">
                     <h4 className="font-bold text-sm mb-1">Approval Required</h4>

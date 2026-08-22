@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, Calendar, Briefcase, Phone, FileText, Database } from 'lucide-react';
 
-const TOOLS = [
+const INITIAL_TOOLS = [
   { id: 'email', name: 'Email', icon: <Mail className="w-5 h-5" />, connected: false, color: 'var(--accent-blue)' },
   { id: 'calendar', name: 'Calendar', icon: <Calendar className="w-5 h-5" />, connected: false, color: 'var(--accent-red)' },
   { id: 'linkedin', name: 'LinkedIn', icon: <Briefcase className="w-5 h-5" />, connected: false, color: 'var(--accent-cyan)' },
@@ -11,16 +11,23 @@ const TOOLS = [
 ];
 
 const ToolsGrid = () => {
+  const [tools, setTools] = useState(INITIAL_TOOLS);
+
+  const toggleTool = (id) => {
+    setTools(tools.map(t => t.id === id ? { ...t, connected: !t.connected } : t));
+  };
+
   return (
     <div className="card-static p-5">
       <h3 className="font-bold text-sm text-[var(--text-muted)] uppercase tracking-wider mb-4">Integrations</h3>
       <div className="grid grid-cols-2 gap-2.5">
-        {TOOLS.map(tool => (
+        {tools.map(tool => (
           <div
             key={tool.id}
-            className="card p-3 flex flex-col items-center justify-center text-center cursor-pointer"
+            onClick={() => toggleTool(tool.id)}
+            className={`card p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${tool.connected ? 'border-[var(--border-medium)] bg-[var(--bg-card)]' : ''}`}
           >
-            <div className="mb-2" style={{ color: tool.connected ? tool.color : 'var(--text-muted)' }}>
+            <div className="mb-2 transition-colors" style={{ color: tool.connected ? tool.color : 'var(--text-muted)' }}>
               {tool.icon}
             </div>
             <span className="text-[11px] font-medium">{tool.name}</span>

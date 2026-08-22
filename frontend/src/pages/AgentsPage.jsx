@@ -137,7 +137,7 @@ const AgentsPage = () => {
 
           {/* Empty Desk / Hire More */}
           <motion.div
-            className="card flex flex-col items-center justify-center p-8 text-center cursor-pointer min-h-[350px] border-dashed !border-[var(--border-medium)]"
+            className="card flex flex-col items-center justify-center p-8 text-center cursor-pointer min-h-[350px] border-dashed !border-[var(--border-medium)] hover:border-[var(--accent-lime)] transition-colors"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -145,9 +145,9 @@ const AgentsPage = () => {
             <div className="w-16 h-16 rounded-2xl bg-[var(--bg-elevated)] flex items-center justify-center mb-4">
               <Plus className="w-7 h-7 text-[var(--text-muted)]" />
             </div>
-            <h3 className="text-base font-bold mb-1">Empty Desk</h3>
-            <p className="text-xs text-[var(--text-muted)] mb-4">Hire a new AI employee to fill this spot</p>
-            <button className="btn-secondary text-sm">Browse Marketplace</button>
+            <h3 className="text-base font-bold mb-1">More Agents Coming Soon</h3>
+            <p className="text-xs text-[var(--text-muted)] mb-4">HR, Marketing, and Engineering agents are joining the team soon.</p>
+            <button className="btn-secondary text-sm">Join Waitlist</button>
           </motion.div>
         </div>
       )}

@@ -14,7 +14,7 @@ class LLMService:
         self.gemini_key = os.getenv("GEMINI_API_KEY")
         if self.gemini_key and self.gemini_key != "your_google_ai_studio_key_here":
             genai.configure(api_key=self.gemini_key)
-            self.gemini_model = genai.GenerativeModel('gemini-flash-latest')
+            self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
         else:
             self.gemini_model = None
             

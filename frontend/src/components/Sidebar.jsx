@@ -13,12 +13,12 @@ const NAV_ITEMS = [
   { to: '/dashboard/files', icon: Folder, label: 'Files' },
 ];
 
-import { Github, Linkedin } from 'lucide-react';
+import { Code, Briefcase } from 'lucide-react';
 
 const BOTTOM_ITEMS = [
   { to: '#', icon: Settings, label: 'Settings' },
-  { to: 'https://github.com/Abhishek11hub987', icon: Github, label: 'Creator GitHub' },
-  { to: 'https://linkedin.com/in/abhishek', icon: Linkedin, label: 'Creator LinkedIn' },
+  { to: 'https://github.com/Abhishek11hub987', icon: Code, label: 'Creator GitHub' },
+  { to: 'https://linkedin.com/in/abhishek', icon: Briefcase, label: 'Creator LinkedIn' },
 ];
 
 const Sidebar = ({ collapsed, setCollapsed }) => {

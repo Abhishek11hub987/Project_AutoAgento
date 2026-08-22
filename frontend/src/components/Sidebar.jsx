@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation, Link } from 'react-router-dom';
+import HelpCenterModal from './HelpCenterModal';
 import {
   LayoutDashboard, Users, MessageSquare, BarChart3,
   Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight,
@@ -22,6 +23,7 @@ const BOTTOM_ITEMS = [
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const isActive = (path, exact = false) => {
     if (exact) return location.pathname === path;
@@ -95,15 +97,17 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         </div>
 
         {BOTTOM_ITEMS.map((item) => (
-          <a
+          <button
             key={item.label}
-            href={item.to}
-            className={`sidebar-link ${collapsed ? '!justify-center !px-2' : ''}`}
+            onClick={() => {
+              if (item.label === 'Help Center') setIsHelpOpen(true);
+            }}
+            className={`w-full sidebar-link ${collapsed ? '!justify-center !px-2' : ''}`}
             title={item.label}
           >
             <item.icon className="w-[18px] h-[18px] shrink-0 sidebar-icon" />
             {!collapsed && <span>{item.label}</span>}
-          </a>
+          </button>
         ))}
       </nav>
 
@@ -118,7 +122,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             <a href="https://github.com/Abhishek11hub987" target="_blank" rel="noreferrer" className="w-6 h-6 rounded flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-lime)] hover:text-[var(--accent-lime)] transition-colors" title="GitHub">
               <Code className="w-3.5 h-3.5" />
             </a>
-            <a href="https://linkedin.com/in/abhishek" target="_blank" rel="noreferrer" className="w-6 h-6 rounded flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-lime)] hover:text-[var(--accent-lime)] transition-colors" title="LinkedIn">
+            <a href="https://www.linkedin.com/in/abhishekyadavai" target="_blank" rel="noreferrer" className="w-6 h-6 rounded flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-lime)] hover:text-[var(--accent-lime)] transition-colors" title="LinkedIn">
               <Briefcase className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -144,6 +148,8 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </div>
         )}
       </div>
+
+      <HelpCenterModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </aside>
   );
 };

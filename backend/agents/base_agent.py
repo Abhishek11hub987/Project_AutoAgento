@@ -19,6 +19,25 @@ class BaseAgent:
         self.conversation_history.append({"role": "user", "content": msg})
         
         max_loops = 5
+        
+        if not self.tools:
+            # If no tools, just stream the response instantly
+            full_response = ""
+            for chunk in llm_service.generate_response_stream(self.system_prompt, msg):
+                if chunk.startswith("data: "):
+                    import json
+                    try:
+                        data = json.loads(chunk[6:])
+                        if data.get("text"):
+                            full_response += data["text"]
+                            yield {"type": "text", "content": data["text"]}
+                    except:
+                        pass
+            self.conversation_history.append({"role": "model", "content": full_response})
+            return
+
+        yield {"type": "tool_call", "function_name": "analyzing request..."}
+        
         for _ in range(max_loops):
             response = llm_service.generate_response_with_tools(
                 self.system_prompt,

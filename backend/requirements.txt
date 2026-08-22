@@ -22,3 +22,4 @@ openpyxl
 sentry-sdk[fastapi]
 psycopg2-binary
 protobuf==3.20.3
+httpx==0.27.2

@@ -25,6 +25,24 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const strAgentId = String(agentId);
+        const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
+        const res = await axios.get(`${API_URL}/api/chat/history/${agentIdNormalized}`);
+        if (res.data && res.data.length > 0) {
+          setMessages(res.data);
+        } else {
+          setMessages(INITIAL_MESSAGES);
+        }
+      } catch (err) {
+        console.error("Failed to fetch history", err);
+      }
+    };
+    fetchHistory();
+  }, [agentId]);
+
   const handleSend = async (messageText = input) => {
     if (!messageText.trim()) return;
     const userMsg = { id: Date.now(), role: 'user', content: messageText };

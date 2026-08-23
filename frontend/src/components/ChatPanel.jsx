@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Paperclip, Check, X, User, FileText, Users } from 'lucide-react';
+import { Send, Paperclip, Check, X, User, FileText, Users, Globe } from 'lucide-react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 
 const INITIAL_MESSAGES = [
   { id: 1, role: 'system', content: 'Agent is ready. Start a conversation to begin.' }
@@ -14,6 +15,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
   const [isLoading, setIsLoading] = useState(false);
   const [activeFilePath, setActiveFilePath] = useState(null);
   const [isMultiAgent, setIsMultiAgent] = useState(false);
+  const [preferredLanguage, setPreferredLanguage] = useState('English');
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -39,6 +41,9 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
       const strAgentId = String(agentId);
       const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rohit' : strAgentId === '3' ? 'anjali' : 'priya';
       
+      const requestContext = activeFilePath ? { file_path: activeFilePath, multi_agent: isMultiAgent } : { multi_agent: isMultiAgent };
+      requestContext.preferred_language = preferredLanguage;
+      
       const response = await fetch(`${API_URL}/api/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,7 +51,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
           agent_id: agentIdNormalized,
           user_id: 1,
           message: messageText,
-          context: activeFilePath ? { file_path: activeFilePath, multi_agent: isMultiAgent } : { multi_agent: isMultiAgent }
+          context: requestContext
         })
       });
       
@@ -95,12 +100,8 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
         }
       }
       
-      const lowerMsg = fullContent.toLowerCase();
-      if (lowerMsg.includes("draft") || lowerMsg.includes("gst") || lowerMsg.includes("invoice") || lowerMsg.includes("approve")) {
-          setMessages(prev => prev.map(msg => 
-            msg.id === agentMsgId ? { ...msg, hasApproval: true } : msg
-          ));
-      }
+      // Removed mock approval logic
+
 
     } catch (error) {
       console.error('Chat error:', error);
@@ -149,18 +150,32 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
           </div>
         </div>
         
-        {/* Multi-Agent Toggle */}
-        <div className="flex items-center gap-2 mr-2">
-          <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 font-medium">
-            <Users className="w-3.5 h-3.5" /> 
-            Multi-Agent
-          </span>
-          <button 
-            onClick={() => setIsMultiAgent(!isMultiAgent)}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isMultiAgent ? 'bg-[var(--accent-lime)]' : 'bg-[var(--bg-elevated)]'}`}
-          >
-            <span className={`inline-block h-3 w-3 transform rounded-full bg-[var(--bg-primary)] transition-transform ${isMultiAgent ? 'translate-x-5' : 'translate-x-1'}`} />
-          </button>
+        {/* Language & Multi-Agent Toggles */}
+        <div className="flex items-center gap-4 mr-2">
+          <div className="flex items-center gap-2 border-r border-[var(--border-subtle)] pr-4">
+            <Globe className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <select 
+              value={preferredLanguage} 
+              onChange={(e) => setPreferredLanguage(e.target.value)}
+              className="bg-transparent text-xs font-medium text-[var(--text-muted)] focus:outline-none cursor-pointer"
+            >
+              <option value="English">English</option>
+              <option value="Hindi">Hindi (à¤¹à¤¿à¤‚à¤¦à¥€)</option>
+              <option value="Hinglish">Hinglish</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 font-medium">
+              <Users className="w-3.5 h-3.5" /> 
+              Multi-Agent
+            </span>
+            <button 
+              onClick={() => setIsMultiAgent(!isMultiAgent)}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isMultiAgent ? 'bg-[var(--accent-lime)]' : 'bg-[var(--bg-elevated)]'}`}
+            >
+              <span className={`inline-block h-3 w-3 transform rounded-full bg-[var(--bg-primary)] transition-transform ${isMultiAgent ? 'translate-x-5' : 'translate-x-1'}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -177,7 +192,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
             )}
             {msg.role === 'user' && (
               <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-[80%] bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20">
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                <ReactMarkdown className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</ReactMarkdown>
               </div>
             )}
             {msg.role === 'agent' && (
@@ -190,8 +205,8 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
                 ))}
                 
                 {msg.content && (
-                  <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)]">
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)] prose prose-sm prose-invert max-w-none text-[var(--text-primary)]">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 )}
 

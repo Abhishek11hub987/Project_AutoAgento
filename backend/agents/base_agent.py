@@ -19,11 +19,20 @@ class BaseAgent:
         self.conversation_history.append({"role": "user", "content": msg})
         
         max_loops = 5
-        
+        system_prompt = self.system_prompt
+        if context and 'preferred_language' in context:
+            lang = context['preferred_language']
+            if lang.lower() == 'hindi':
+                system_prompt += "\n\nCRITICAL INSTRUCTION: You MUST reply entirely in Hindi (Devenagari script)."
+            elif lang.lower() == 'hinglish':
+                system_prompt += "\n\nCRITICAL INSTRUCTION: You MUST reply entirely in Hinglish (Hindi written in English alphabet)."
+            else:
+                system_prompt += "\n\nCRITICAL INSTRUCTION: You MUST reply entirely in English."
+                
         if not self.tools:
             # If no tools, just stream the response instantly
             full_response = ""
-            for chunk in llm_service.generate_response_stream(self.system_prompt, msg):
+            for chunk in llm_service.generate_response_stream(system_prompt, msg):
                 if chunk.startswith("data: "):
                     import json
                     try:
@@ -40,7 +49,7 @@ class BaseAgent:
         
         for _ in range(max_loops):
             response = llm_service.generate_response_with_tools(
-                self.system_prompt,
+                system_prompt,
                 self.conversation_history,
                 self.tools
             )

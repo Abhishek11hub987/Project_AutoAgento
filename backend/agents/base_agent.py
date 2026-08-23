@@ -76,6 +76,15 @@ class BaseAgent:
                             tool_result = f"Error executing tool: {str(e)}"
                         break
                         
+                # 1) Append the model's tool call
+                self.conversation_history.append({
+                    "role": "model",
+                    "type": "tool_call",
+                    "function_name": func_name,
+                    "args": args
+                })
+                
+                # 2) Append the user's tool response
                 self.conversation_history.append({
                     "role": "user", 
                     "type": "tool_response",

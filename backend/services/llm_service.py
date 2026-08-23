@@ -234,12 +234,27 @@ class LLMService:
                 # Format messages for Groq
                 groq_messages = [{"role": "system", "content": system_prompt}]
                 for msg in messages:
-                    role = "user" if msg["role"] == "user" else "assistant"
-                    content = msg["content"]
-                    if msg.get("type") == "tool_response":
-                        role = "user"
-                        content = f"Tool Response for {msg.get('function_name')}: {msg.get('content')}"
-                    groq_messages.append({"role": role, "content": content})
+                    if msg.get("type") == "tool_call":
+                        groq_messages.append({
+                            "role": "assistant",
+                            "tool_calls": [{
+                                "id": "call_" + msg.get("function_name"),
+                                "type": "function",
+                                "function": {
+                                    "name": msg.get("function_name"),
+                                    "arguments": json.dumps(msg.get("args", {}))
+                                }
+                            }]
+                        })
+                    elif msg.get("type") == "tool_response":
+                        groq_messages.append({
+                            "role": "tool",
+                            "tool_call_id": "call_" + msg.get("function_name"),
+                            "content": msg.get("content", "")
+                        })
+                    else:
+                        role = "user" if msg["role"] == "user" else "assistant"
+                        groq_messages.append({"role": role, "content": msg.get("content", "")})
                     
                 completion = self.groq_client.chat.completions.create(
                     model="qwen/qwen3.6-27b", # This model supports tools on their tier

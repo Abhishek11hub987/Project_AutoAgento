@@ -55,7 +55,6 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
         })
       });
       
-      setIsLoading(false);
       if (onTaskComplete) onTaskComplete(taskId);
       
       const reader = response.body.getReader();
@@ -76,6 +75,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
+        setIsLoading(false);
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
         for (const line of lines) {
@@ -151,29 +151,29 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
         </div>
         
         {/* Language & Multi-Agent Toggles */}
-        <div className="flex items-center gap-4 mr-2">
-          <div className="flex items-center gap-2 border-r border-[var(--border-subtle)] pr-4">
-            <Globe className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+        <div className="flex items-center gap-3 mr-2 bg-[var(--bg-elevated)] p-1.5 rounded-2xl border border-[var(--accent-lime)]/30 shadow-[0_0_15px_rgba(200,255,0,0.05)]">
+          <div className="flex items-center gap-1.5 border-r border-[var(--border-subtle)] pr-3 pl-2">
+            <Globe className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
             <select 
               value={preferredLanguage} 
               onChange={(e) => setPreferredLanguage(e.target.value)}
-              className="bg-transparent text-xs font-medium text-[var(--text-muted)] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer"
             >
               <option value="English">English</option>
               <option value="Hindi">Hindi (हिंदी)</option>
               <option value="Hinglish">Hinglish</option>
             </select>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 font-medium">
-              <Users className="w-3.5 h-3.5" /> 
+          <div className="flex items-center gap-2 pr-2">
+            <span className="text-xs text-[var(--text-primary)] flex items-center gap-1 font-semibold">
+              <Users className="w-3.5 h-3.5 text-[var(--accent-purple)]" /> 
               Multi-Agent
             </span>
             <button 
               onClick={() => setIsMultiAgent(!isMultiAgent)}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isMultiAgent ? 'bg-[var(--accent-lime)]' : 'bg-[var(--bg-elevated)]'}`}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-300 ${isMultiAgent ? 'bg-[var(--accent-lime)] shadow-[0_0_10px_rgba(200,255,0,0.4)]' : 'bg-[var(--bg-input)] border border-[var(--border-subtle)]'}`}
             >
-              <span className={`inline-block h-3 w-3 transform rounded-full bg-[var(--bg-primary)] transition-transform ${isMultiAgent ? 'translate-x-5' : 'translate-x-1'}`} />
+              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[var(--bg-primary)] transition-transform duration-300 ${isMultiAgent ? 'translate-x-4.5' : 'translate-x-1'}`} />
             </button>
           </div>
         </div>

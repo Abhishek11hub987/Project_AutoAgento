@@ -45,7 +45,7 @@ class LLMService:
         elif fallback_level <= 1 and self.groq_client:
             try:
                 completion = self.groq_client.chat.completions.create(
-                    model="groq/compound-mini",
+                    model="qwen/qwen3.6-27b",
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message}
@@ -97,7 +97,7 @@ class LLMService:
         elif fallback_level <= 1 and self.groq_client:
             try:
                 stream = self.groq_client.chat.completions.create(
-                    model="groq/compound-mini",
+                    model="qwen/qwen3.6-27b",
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message}
@@ -242,7 +242,7 @@ class LLMService:
                     groq_messages.append({"role": role, "content": content})
                     
                 completion = self.groq_client.chat.completions.create(
-                    model="groq/compound-mini", # Groq recommends this for tool calling
+                    model="qwen/qwen3.6-27b", # This model supports tools on their tier
                     messages=groq_messages,
                     tools=groq_tools,
                     tool_choice="auto",

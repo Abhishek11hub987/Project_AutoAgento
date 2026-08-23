@@ -39,7 +39,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
 
     try {
       const strAgentId = String(agentId);
-      const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rohit' : strAgentId === '3' ? 'anjali' : 'priya';
+      const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
       
       const requestContext = activeFilePath ? { file_path: activeFilePath, multi_agent: isMultiAgent } : { multi_agent: isMultiAgent };
       requestContext.preferred_language = preferredLanguage;

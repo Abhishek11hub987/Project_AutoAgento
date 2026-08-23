@@ -19,7 +19,7 @@ class ChatResponse(BaseModel):
     content: str
     hasApproval: bool
 
-@router.get("/api/chat/history/{agent_id}")
+@router.get("/chat/history/{agent_id}")
 async def get_chat_history(agent_id: str, db: Session = Depends(get_db)):
     # Defaulting user_id to 1 since we don't have full JWT auth parsing yet.
     history = db.query(Conversation).filter(
@@ -53,14 +53,50 @@ async def chat_with_agent(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/chat/stream")
-async def chat_with_agent_stream(request: ChatRequest):
+async def chat_with_agent_stream(request: ChatRequest, db: Session = Depends(get_db)):
     agent = agents_registry.get(request.agent_id.lower())
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
         
+    # Save the user's message to the DB
+    user_msg = Conversation(
+        agent_id=request.agent_id.lower(),
+        user_id=1, # Hardcoded until JWT auth
+        role="user",
+        content=request.message,
+        message_type="text"
+    )
+    db.add(user_msg)
+    db.commit()
+        
+    async def event_stream():
+        full_response = ""
+        for chunk in agent.process_message_stream(request.message, request.context):
+            # The chunk is formatted as "data: {...}\n\n"
+            if chunk.startswith("data: "):
+                try:
+                    data = json.loads(chunk[6:])
+                    if data.get("text") and not chunk.startswith("data: {\"type\": \"tool_call\""):
+                        full_response += data["text"]
+                except:
+                    pass
+            yield chunk
+            
+        # Save the agent's final text response to the DB
+        if full_response.strip():
+            agent_msg = Conversation(
+                agent_id=request.agent_id.lower(),
+                user_id=1,
+                role="agent",
+                content=full_response,
+                message_type="text"
+            )
+            db.add(agent_msg)
+            db.commit()
+
     try:
         return StreamingResponse(
-            agent.process_message_stream(request.message, request.context),
+            event_stream(),
             media_type="text/event-stream"
         )
     except Exception as e:

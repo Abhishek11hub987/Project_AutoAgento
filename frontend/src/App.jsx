@@ -1,5 +1,6 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { supabase } from './lib/supabaseClient'
 
 // Pages
 import LandingPage from './pages/LandingPage'
@@ -12,6 +13,37 @@ import FilesPage from './pages/FilesPage'
 // Layout
 import DashboardLayout from './components/DashboardLayout'
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (loading) {
+    return <div className="flex h-screen w-full items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[var(--accent-lime)] border-t-transparent animate-spin" /></div>
+  }
+
+  if (!session) {
+    return <Navigate to="/" />
+  }
+
+  return children
+}
+
 function App() {
   return (
     <Router>
@@ -20,7 +52,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
 
         {/* Authenticated — Dashboard (with Sidebar) */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index element={<DashboardHome />} />
           <Route path="agents" element={<AgentsPage />} />
           <Route path="agent/:id" element={<AgentWorkspacePage />} />

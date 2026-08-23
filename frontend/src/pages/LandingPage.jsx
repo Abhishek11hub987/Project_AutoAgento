@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabaseClient';
 import {
   ArrowRight, Bot, BarChart3, Shield, Zap, Globe, FileText,
   Users, TrendingUp, CheckCircle2, ChevronRight,
@@ -8,6 +9,18 @@ import {
   Target, Award, Play, Mail, Phone, MapPin,
   Share2, Link2, ExternalLink, ArrowUpRight, Code2
 } from 'lucide-react';
+
+export const handleLogin = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/dashboard`
+    }
+  });
+  if (error) {
+    console.error("Error signing in with Google", error);
+  }
+};
 
 /* ═══════════════════════════════════════════════════════ */
 /*  FLOATING WIDGET                                        */
@@ -67,10 +80,10 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/dashboard" className="btn-secondary text-sm hidden sm:inline-flex">Sign In</Link>
-          <Link to="/dashboard" className="btn-primary text-sm flex items-center gap-1.5">
+          <button onClick={handleLogin} className="btn-secondary text-sm hidden sm:inline-flex">Sign In</button>
+          <button onClick={handleLogin} className="btn-primary text-sm flex items-center gap-1.5">
             Get Started <ArrowRight className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
       </div>
     </nav>
@@ -121,9 +134,9 @@ const Hero = () => (
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
             className="flex flex-wrap gap-4 mb-10"
           >
-            <Link to="/dashboard" className="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
+            <button onClick={handleLogin} className="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
               Get Started <ArrowRight className="w-5 h-5" />
-            </Link>
+            </button>
             <a href="#how-it-works" className="btn-secondary text-base px-8 py-3.5 flex items-center gap-2">
               <Play className="w-4 h-4" /> How it Works
             </a>
@@ -437,9 +450,9 @@ const CTABanner = () => (
           AutoAgento is free and open source. Deploy it yourself or use our hosted version to get started instantly.
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
-          <Link to="/dashboard" className="btn-primary text-base px-10 py-4 inline-flex items-center gap-2">
-            Get Started <ArrowRight className="w-5 h-5" />
-          </Link>
+          <button onClick={handleLogin} className="btn-primary text-base px-10 py-4 flex items-center gap-2">
+            Build Your Team <ArrowRight className="w-5 h-5" />
+          </button>
           <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-secondary text-base px-10 py-4 inline-flex items-center gap-2">
             <Code2 className="w-5 h-5" /> View on GitHub
           </a>

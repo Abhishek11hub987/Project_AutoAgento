@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 import {
   MessageSquare, Settings, Award, Plus, Search,
   Filter
@@ -28,7 +29,6 @@ const AgentsPage = () => {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         const response = await axios.get(`${API_URL}/api/agents`);
         setAgents(response.data);
       } catch (error) {

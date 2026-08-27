@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 import {
   TrendingUp, TrendingDown, Users, IndianRupee, Activity,
   Zap, ArrowUpRight, CheckCircle2, Clock, AlertCircle,
@@ -179,7 +180,6 @@ const DashboardHome = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         const [statsRes, activityRes, agentsRes] = await Promise.all([
           axios.get(`${API_URL}/api/dashboard/stats`),
           axios.get(`${API_URL}/api/dashboard/activity`),

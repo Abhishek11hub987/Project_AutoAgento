@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 import ChatPanel from '../components/ChatPanel';
 import TaskQueue from '../components/TaskQueue';
 import ToolsGrid from '../components/ToolsGrid';
@@ -15,7 +16,6 @@ const AgentWorkspacePage = () => {
   useEffect(() => {
     const fetchAgent = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         const response = await axios.get(`${API_URL}/api/agents/${id}`);
         setAgent(response.data);
       } catch (error) {

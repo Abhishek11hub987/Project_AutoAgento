@@ -2,12 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, Check, X, User, FileText, Users, Globe } from 'lucide-react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import { API_URL } from '../config/api';
 
 const INITIAL_MESSAGES = [
   { id: 1, role: 'system', content: 'Agent is ready. Start a conversation to begin.' }
 ];
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩‍💼', onTaskStart, onTaskComplete }) => {
   const [input, setInput] = useState('');
@@ -101,7 +100,8 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
             try {
               const data = JSON.parse(line.substring(6));
               if (data.type === 'tool_call') {
-                toolCalls.push(data.text);
+                const toolText = data.text || data.function_name || 'Calling tool...';
+                toolCalls.push(toolText);
                 setMessages(prev => prev.map(msg => 
                   msg.id === agentMsgId ? { ...msg, toolCalls: [...toolCalls] } : msg
                 ));
@@ -210,7 +210,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = '👩�
             )}
             {msg.role === 'user' && (
               <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-[80%] bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20">
-                <ReactMarkdown className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</ReactMarkdown>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
               </div>
             )}
             {msg.role === 'agent' && (

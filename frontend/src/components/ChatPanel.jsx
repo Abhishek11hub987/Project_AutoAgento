@@ -222,11 +222,25 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
                   </div>
                 ))}
                 
-                {msg.content && (
-                  <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)] prose prose-sm prose-invert max-w-none text-[var(--text-primary)]">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                )}
+                {msg.content && (() => {
+                  const cleanContent = msg.content.replace(/<think>[\s\S]*?(<\/think>|$)/gi, '').trim();
+                  
+                  // If we are currently streaming and only have the <think> block so far
+                  if (!cleanContent && msg.content.includes('<think>')) {
+                    return (
+                      <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)] text-[var(--text-secondary)] text-sm flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full border-2 border-[var(--accent-cyan)] border-t-transparent animate-spin" />
+                        Thinking...
+                      </div>
+                    );
+                  }
+
+                  return cleanContent ? (
+                    <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)] prose prose-sm prose-invert max-w-none text-[var(--text-primary)]">
+                      <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                    </div>
+                  ) : null;
+                })()}
 
                 {msg.hasApproval && (
                   <div className="mt-2 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]">

@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 from database import SessionLocal, engine, Base, Agent, User
 import json
 

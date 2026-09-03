@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, Link } from 'react-router-dom';
 import HelpCenterModal from './HelpCenterModal';
+import SettingsModal from './SettingsModal';
 import {
   LayoutDashboard, Users, MessageSquare, BarChart3,
   Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight,
@@ -24,6 +25,8 @@ const BOTTOM_ITEMS = [
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('profile');
 
   const isActive = (path, exact = false) => {
     if (exact) return location.pathname === path;
@@ -78,7 +81,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.to, item.exact);
           return (
-            <NavLink
+            <Link
               key={item.to}
               to={item.to}
               className={`sidebar-link ${active ? 'active' : ''} ${collapsed ? '!justify-center !px-2' : ''}`}
@@ -86,7 +89,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             >
               <item.icon className={`w-[18px] h-[18px] shrink-0 sidebar-icon ${active ? 'text-[var(--accent-lime)]' : ''}`} />
               {!collapsed && <span>{item.label}</span>}
-            </NavLink>
+            </Link>
           );
         })}
 
@@ -101,6 +104,10 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             key={item.label}
             onClick={() => {
               if (item.label === 'Help Center') setIsHelpOpen(true);
+              if (item.label === 'Settings') {
+                setSettingsTab('appearance');
+                setIsSettingsOpen(true);
+              }
             }}
             className={`w-full sidebar-link ${collapsed ? '!justify-center !px-2' : ''}`}
             title={item.label}
@@ -132,7 +139,13 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       {/* User Profile */}
       <div className={`px-3 py-4 border-t border-[var(--border-subtle)] ${collapsed ? 'flex justify-center' : ''}`}>
         {!collapsed ? (
-          <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer">
+          <div 
+            onClick={() => {
+              setSettingsTab('profile');
+              setIsSettingsOpen(true);
+            }}
+            className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer"
+          >
             <div className="w-9 h-9 rounded-lg bg-[var(--accent-lime)]/10 flex items-center justify-center">
               <span className="text-sm font-bold text-[var(--accent-lime)]">U</span>
             </div>
@@ -150,6 +163,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       </div>
 
       <HelpCenterModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} defaultTab={settingsTab} />
     </aside>
   );
 };

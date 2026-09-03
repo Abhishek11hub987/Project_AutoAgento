@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 from fastapi import FastAPI
@@ -6,10 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import chat, files, dashboard, agents
 from database import engine, Base
 import sentry_sdk
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 sentry_dsn = os.getenv("SENTRY_DSN")
 if sentry_dsn:

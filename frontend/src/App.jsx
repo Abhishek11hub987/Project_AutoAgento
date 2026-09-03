@@ -21,6 +21,10 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
+      // If there's no session but there's a hash in the URL, wait for onAuthStateChange to parse it
+      if (!session && window.location.hash.includes('access_token')) {
+        return;
+      }
       setLoading(false)
     })
 
@@ -28,6 +32,7 @@ const ProtectedRoute = ({ children }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()

@@ -5,6 +5,7 @@ from typing import Optional, List
 from database import get_db, Conversation
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
+import json
 
 router = APIRouter()
 
@@ -21,9 +22,12 @@ class ChatResponse(BaseModel):
 
 @router.get("/chat/history/{agent_id}")
 async def get_chat_history(agent_id: str, db: Session = Depends(get_db)):
+    agent_id_map = {"priya": 1, "rahul": 2, "anjali": 3, "rohit": 4}
+    agent_int_id = agent_id_map.get(agent_id.lower(), 1)
+    
     # Defaulting user_id to 1 since we don't have full JWT auth parsing yet.
     history = db.query(Conversation).filter(
-        Conversation.agent_id == agent_id,
+        Conversation.agent_id == agent_int_id,
         Conversation.user_id == 1
     ).order_by(Conversation.created_at.asc()).all()
     

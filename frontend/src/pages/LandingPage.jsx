@@ -57,11 +57,26 @@ const SectionTag = ({ children }) => (
 /* ═══════════════════════════════════════════════════════ */
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    
+    // Check if user is already logged in to prevent login loops
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate('/dashboard');
+    });
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate('/dashboard');
+    });
+    
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass-nav py-3' : 'py-5'}`}>

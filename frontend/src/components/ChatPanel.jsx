@@ -209,14 +209,14 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
               </div>
             )}
             {msg.role === 'user' && (
-              <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-[80%] bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20">
-                <div className="text-sm leading-relaxed whitespace-pre-wrap"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
+              <div className="px-5 py-3 rounded-2xl rounded-br-sm max-w-[80%] bg-[var(--accent-lime)] text-[var(--bg-primary)] shadow-md">
+                <div className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{msg.content}</div>
               </div>
             )}
             {msg.role === 'agent' && (
               <div className="flex flex-col w-full max-w-[85%]">
                 {msg.toolCalls && msg.toolCalls.map((tc, idx) => (
-                  <div key={idx} className="mb-2 px-3 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium flex items-center gap-2 max-w-fit">
+                  <div key={idx} className="mb-2 px-3 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium flex items-center gap-2 max-w-fit shadow-sm">
                     <div className="w-1.5 h-1.5 bg-[var(--accent-lime)] rounded-full animate-pulse" />
                     {tc.replace('\\n', '')}
                   </div>
@@ -228,16 +228,18 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
                   // If we are currently streaming and only have the <think> block so far
                   if (!cleanContent && msg.content.includes('<think>')) {
                     return (
-                      <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)] text-[var(--text-secondary)] text-sm flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full border-2 border-[var(--accent-cyan)] border-t-transparent animate-spin" />
+                      <div className="px-5 py-3.5 rounded-2xl rounded-bl-sm bg-[var(--bg-card)] text-[var(--text-secondary)] text-sm flex items-center gap-3 shadow-md border border-[var(--border-subtle)]">
+                        <div className="w-4 h-4 rounded-full border-2 border-[var(--accent-lime)] border-t-transparent animate-spin" />
                         Thinking...
                       </div>
                     );
                   }
 
                   return cleanContent ? (
-                    <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-[var(--bg-elevated)] border-l-2 border-[var(--accent-cyan)] prose prose-sm prose-invert max-w-none text-[var(--text-primary)]">
-                      <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                    <div className="px-5 py-3.5 rounded-2xl rounded-bl-sm bg-[var(--bg-card)] shadow-md border border-[var(--border-subtle)] text-[var(--text-primary)]">
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--bg-elevated)] prose-pre:border prose-pre:border-[var(--border-subtle)]">
+                        <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                      </div>
                     </div>
                   ) : null;
                 })()}

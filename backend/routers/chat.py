@@ -42,7 +42,12 @@ async def get_chat_history(agent_id: str, db: Session = Depends(get_db)):
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_agent(request: ChatRequest):
-    agent = agents_registry.get(request.agent_id.lower())
+    agent_id = request.agent_id.lower()
+    
+    if request.context and request.context.get("multi_agent") is True:
+        agent_id = "supervisor"
+        
+    agent = agents_registry.get(agent_id)
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
         
@@ -58,7 +63,12 @@ async def chat_with_agent(request: ChatRequest):
 
 @router.post("/chat/stream")
 async def chat_with_agent_stream(request: ChatRequest, db: Session = Depends(get_db)):
-    agent = agents_registry.get(request.agent_id.lower())
+    agent_id = request.agent_id.lower()
+    
+    if request.context and request.context.get("multi_agent") is True:
+        agent_id = "supervisor"
+
+    agent = agents_registry.get(agent_id)
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
         

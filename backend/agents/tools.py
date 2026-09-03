@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 import uuid
+import sys
+from io import StringIO
 
 def read_excel_file(file_path: str) -> str:
     """
@@ -85,5 +87,64 @@ def search_leads(industry: str, location: str) -> str:
     """
     return f"Found 3 leads for {industry} in {location}:\n1. TechCorp (CTO: Alice)\n2. Innovate LLC (CEO: Bob)\n3. DataSystems (VP: Charlie)"
 
+def generate_markdown_report(filename: str, content: str) -> str:
+    """
+    Generates a Markdown file with the provided content and saves it to the disk.
+    Use this to write comprehensive reports, summaries, or invoices.
+    """
+    try:
+        # Create uploads directory if it doesn't exist
+        os.makedirs("uploads", exist_ok=True)
+        
+        # Ensure filename is safe and ends with .md
+        safe_filename = filename.replace("/", "").replace("\\", "").replace(" ", "_")
+        if not safe_filename.endswith('.md'):
+            safe_filename += '.md'
+            
+        filepath = os.path.join("uploads", safe_filename)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+            
+        return f"Success! Report successfully generated and saved as {safe_filename}."
+    except Exception as e:
+        return f"Error generating report: {str(e)}"
+
+def execute_python_script(code: str) -> str:
+    """
+    Executes raw Python code for data analysis, mathematical calculations, or file processing.
+    The code runs in a secure sandbox. Any stdout (print statements) will be captured and returned.
+    Use this when you need to crunch numbers, perform complex logic, or format data algorithmically.
+    """
+    try:
+        # Capture standard output
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = StringIO()
+        
+        # Define a safe local environment
+        local_env = {'pd': pd, 'os': os}
+        
+        # Execute the code
+        exec(code, {}, local_env)
+        
+        # Restore stdout
+        sys.stdout = old_stdout
+        
+        output = redirected_output.getvalue()
+        if not output.strip():
+            return "Script executed successfully, but produced no output (no print statements)."
+            
+        return f"Script Output:\n{output}"
+    except Exception as e:
+        sys.stdout = old_stdout
+        return f"Error executing python script: {str(e)}\n\nMake sure your syntax is correct and you use print() to output results."
+
 # Export the available tools
-AVAILABLE_TOOLS = [read_excel_file, modify_excel_file, execute_gst_filing_mock, search_leads]
+AVAILABLE_TOOLS = [
+    read_excel_file, 
+    modify_excel_file, 
+    execute_gst_filing_mock, 
+    search_leads,
+    generate_markdown_report,
+    execute_python_script
+]

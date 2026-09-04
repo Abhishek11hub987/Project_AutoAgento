@@ -28,7 +28,12 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
     const fetchHistory = async () => {
       try {
         const strAgentId = String(agentId);
-        const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
+        let agentIdNormalized = 'priya';
+        if (['priya', 'rahul', 'anjali', 'rohit', 'supervisor'].includes(strAgentId.toLowerCase())) {
+          agentIdNormalized = strAgentId.toLowerCase();
+        } else {
+          agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
+        }
         const res = await axios.get(`${API_URL}/api/chat/history/${agentIdNormalized}`);
         if (res.data && res.data.length > 0) {
           setMessages(res.data);
@@ -56,7 +61,12 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
 
     try {
       const strAgentId = String(agentId);
-      const agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
+      let agentIdNormalized = 'priya';
+      if (['priya', 'rahul', 'anjali', 'rohit', 'supervisor'].includes(strAgentId.toLowerCase())) {
+        agentIdNormalized = strAgentId.toLowerCase();
+      } else {
+        agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
+      }
       
       const requestContext = activeFilePath ? { file_path: activeFilePath, multi_agent: isMultiAgent } : { multi_agent: isMultiAgent };
       requestContext.preferred_language = preferredLanguage;

@@ -113,17 +113,25 @@ async def chat_with_agent_stream(request: ChatRequest, db: Session = Depends(get
                     pass
             yield chunk
             
-        # Save the agent's final text response to the DB
+        # Save the agent's final text response to the DB using a fresh session
+        # because the original FastAPI Depends(get_db) session might be closed by now!
         if full_response.strip():
-            agent_msg = Conversation(
-                agent_id=agent_int_id,
-                user_id=1,
-                role="agent",
-                content=full_response,
-                message_type="text"
-            )
-            db.add(agent_msg)
-            db.commit()
+            from database import SessionLocal
+            stream_db = SessionLocal()
+            try:
+                agent_msg = Conversation(
+                    agent_id=agent_int_id,
+                    user_id=1,
+                    role="agent",
+                    content=full_response,
+                    message_type="text"
+                )
+                stream_db.add(agent_msg)
+                stream_db.commit()
+            except Exception as e:
+                print(f"Error saving stream message: {e}")
+            finally:
+                stream_db.close()
 
     try:
         return StreamingResponse(

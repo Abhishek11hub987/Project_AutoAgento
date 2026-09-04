@@ -79,7 +79,8 @@ Use these exact links:
 - For Anjali: [View Anjali's Log](/dashboard/agent/3)
 
 ### 3. Generated Artifacts
-Provide the direct markdown links to any files you or your team generated (e.g., `[Download invoice_summary.md](/uploads/invoice_summary.md)`). If no files were generated, state "None".
+Provide the exact markdown links returned by the generate_markdown_report tool. 
+CRITICAL: Do NOT use relative links (like `/uploads/...`). You MUST use the full absolute URL provided by the tool (e.g., `[Download invoice_summary.md](https://project-autoagento.onrender.com/uploads/invoice_summary.md)`). If no files were generated, state "None".
 
 ### 4. Final Summary
 Synthesize the information from your team into a single, cohesive, and professional response for the user. Do not simply copy-paste their responses; provide a true managerial summary answering the user's prompt.

@@ -270,8 +270,14 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
 
                   return cleanContent ? (
                     <div className="px-5 py-3.5 rounded-2xl rounded-bl-sm bg-[var(--bg-card)] shadow-md border border-[var(--border-subtle)] text-[var(--text-primary)]">
-                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--bg-elevated)] prose-pre:border prose-pre:border-[var(--border-subtle)]">
-                        <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--bg-elevated)] prose-pre:border prose-pre:border-[var(--border-subtle)] prose-a:text-[var(--accent-cyan)] prose-a:no-underline hover:prose-a:underline">
+                        <ReactMarkdown
+                          components={{
+                            a: ({node, ...props}) => <a target="_blank" rel="noopener noreferrer" {...props} />
+                          }}
+                        >
+                          {cleanContent}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   ) : null;

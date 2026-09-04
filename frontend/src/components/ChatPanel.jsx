@@ -273,7 +273,14 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
                       <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--bg-elevated)] prose-pre:border prose-pre:border-[var(--border-subtle)] prose-a:text-[var(--accent-cyan)] prose-a:no-underline hover:prose-a:underline">
                         <ReactMarkdown
                           components={{
-                            a: ({node, ...props}) => <a target="_blank" rel="noopener noreferrer" {...props} />
+                            a: ({node, href, ...props}) => {
+                              // Force /uploads/ links to point to the backend API URL
+                              let finalHref = href;
+                              if (href && href.startsWith('/uploads/')) {
+                                finalHref = `${API_URL}${href}`;
+                              }
+                              return <a href={finalHref} target="_blank" rel="noopener noreferrer" {...props} />;
+                            }
                           }}
                         >
                           {cleanContent}

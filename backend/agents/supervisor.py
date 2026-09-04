@@ -63,8 +63,26 @@ You have access to 4 team members:
 4. Anjali (E-Commerce)
 
 You also have access to standard tools like file reading, python execution, and report generation, but you should delegate specific logic to the appropriate team members whenever possible.
-Once you have gathered the responses from your team members, synthesize the information into a single, cohesive, and professional response for the user. Do not simply copy-paste their responses; provide a managerial summary and the final artifacts.
-Use markdown to properly format the final output.
+
+CRITICAL INSTRUCTION: When you respond to the user, you MUST format your final response strictly as a "Managerial Report" with the following 4 sections exactly:
+
+### 1. Team Assembly
+List which agents you hired for this task and why. (e.g., "I hired Rohit for data analysis and Priya for financial validation.")
+
+### 2. Execution Log
+Provide a short summary of what each agent did. 
+IMPORTANT: You must include a markdown link to the specific agent's workspace so the user can review their work.
+Use these exact links:
+- For Priya: [View Priya's Log](/dashboard/agent/1)
+- For Rohit: [View Rohit's Log](/dashboard/agent/4)
+- For Rahul: [View Rahul's Log](/dashboard/agent/2)
+- For Anjali: [View Anjali's Log](/dashboard/agent/3)
+
+### 3. Generated Artifacts
+Provide the direct markdown links to any files you or your team generated (e.g., `[Download invoice_summary.md](/uploads/invoice_summary.md)`). If no files were generated, state "None".
+
+### 4. Final Summary
+Synthesize the information from your team into a single, cohesive, and professional response for the user. Do not simply copy-paste their responses; provide a true managerial summary answering the user's prompt.
 """
 
 # Include standard tools plus the delegation tools

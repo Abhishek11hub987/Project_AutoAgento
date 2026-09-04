@@ -192,7 +192,7 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
               <option value="Hinglish">Hinglish</option>
             </select>
           </div>
-          <div className="flex items-center gap-2 pr-2">
+          <div className="flex items-center gap-2 pr-2 border-r border-[var(--border-subtle)] mr-2">
             <span className="text-xs text-[var(--text-primary)] flex items-center gap-1 font-semibold">
               <Users className="w-3.5 h-3.5 text-[var(--accent-purple)]" /> 
               Multi-Agent
@@ -204,6 +204,29 @@ const ChatPanel = ({ agentId = 'priya', agentName = 'Priya', agentEmoji = 'ðŸ‘©â
               <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[var(--bg-primary)] transition-transform duration-300 ${isMultiAgent ? 'translate-x-4.5' : 'translate-x-1'}`} />
             </button>
           </div>
+          <button 
+            onClick={async () => {
+              if (window.confirm("Are you sure you want to clear this chat history?")) {
+                try {
+                  const strAgentId = String(agentId);
+                  let agentIdNormalized = 'priya';
+                  if (['priya', 'rahul', 'anjali', 'rohit', 'supervisor'].includes(strAgentId.toLowerCase())) {
+                    agentIdNormalized = strAgentId.toLowerCase();
+                  } else {
+                    agentIdNormalized = strAgentId === '1' ? 'priya' : strAgentId === '2' ? 'rahul' : strAgentId === '3' ? 'anjali' : strAgentId === '4' ? 'rohit' : 'priya';
+                  }
+                  await axios.delete(`${API_URL}/api/chat/history/${agentIdNormalized}`);
+                  setMessages(INITIAL_MESSAGES);
+                } catch (error) {
+                  console.error("Error clearing chat", error);
+                }
+              }
+            }}
+            className="p-1.5 rounded-full hover:bg-[var(--accent-red)]/10 hover:text-[var(--accent-red)] transition-colors text-[var(--text-muted)]"
+            title="Clear Chat History"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+          </button>
         </div>
       </div>
 

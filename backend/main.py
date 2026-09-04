@@ -6,6 +6,7 @@ os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from routers import chat, files, dashboard, agents
 from database import engine, Base
 import sentry_sdk
@@ -48,6 +49,7 @@ def read_root():
     return {"message": "Welcome to AutoAgento API"}
 
 # Include routers here when ready
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(chat.router, prefix="/api")
 app.include_router(files.router, prefix="/api/files")
 app.include_router(dashboard.router, prefix="/api/dashboard")

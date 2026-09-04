@@ -20,10 +20,14 @@ class ChatResponse(BaseModel):
     content: str
     hasApproval: bool
 
+def get_agent_int_id(agent_id_str: str) -> int:
+    # Use 99 for supervisor so it doesn't collide
+    agent_id_map = {"priya": 1, "rahul": 2, "anjali": 3, "rohit": 4, "supervisor": 99}
+    return agent_id_map.get(agent_id_str.lower(), 1)
+
 @router.get("/chat/history/{agent_id}")
 async def get_chat_history(agent_id: str, db: Session = Depends(get_db)):
-    agent_id_map = {"priya": 1, "rahul": 2, "anjali": 3, "rohit": 4}
-    agent_int_id = agent_id_map.get(agent_id.lower(), 1)
+    agent_int_id = get_agent_int_id(agent_id)
     
     # Defaulting user_id to 1 since we don't have full JWT auth parsing yet.
     history = db.query(Conversation).filter(
@@ -39,6 +43,17 @@ async def get_chat_history(agent_id: str, db: Session = Depends(get_db)):
             "type": msg.message_type
         } for msg in history
     ]
+
+@router.delete("/chat/history/{agent_id}")
+async def clear_chat_history(agent_id: str, db: Session = Depends(get_db)):
+    agent_int_id = get_agent_int_id(agent_id)
+    
+    db.query(Conversation).filter(
+        Conversation.agent_id == agent_int_id,
+        Conversation.user_id == 1
+    ).delete()
+    db.commit()
+    return {"message": f"History cleared for agent {agent_id}"}
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_agent(request: ChatRequest):
@@ -72,9 +87,11 @@ async def chat_with_agent_stream(request: ChatRequest, db: Session = Depends(get
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
         
+    agent_int_id = get_agent_int_id(agent_id)
+    
     # Save the user's message to the DB
     user_msg = Conversation(
-        agent_id=request.agent_id.lower(),
+        agent_id=agent_int_id,
         user_id=1, # Hardcoded until JWT auth
         role="user",
         content=request.message,
@@ -99,7 +116,7 @@ async def chat_with_agent_stream(request: ChatRequest, db: Session = Depends(get
         # Save the agent's final text response to the DB
         if full_response.strip():
             agent_msg = Conversation(
-                agent_id=request.agent_id.lower(),
+                agent_id=agent_int_id,
                 user_id=1,
                 role="agent",
                 content=full_response,

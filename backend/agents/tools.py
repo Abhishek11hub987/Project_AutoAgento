@@ -106,7 +106,14 @@ def generate_markdown_report(filename: str, content: str) -> str:
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(content)
             
-        return f"Success! Report successfully generated and saved as {safe_filename}."
+        # We must return the absolute URL pointing to the static files mount on the backend
+        # Using a relative /uploads path will be intercepted by the frontend's VITE server unless the frontend parses it correctly.
+        # But actually, the backend runs on API_URL. The frontend proxy or Vercel routing isn't set up.
+        # Let's just output a markdown link using the full Render URL or just rely on Vercel to proxy it.
+        # Wait, the user accesses Vercel (frontend), which talks to Render (backend).
+        # We can use the Render domain. Let's just return a relative path and the LLM will provide it. 
+        # Actually, it's safer to use the VITE_API_URL or a placeholder.
+        return f"Success! Report generated. You can download it here: [Download {safe_filename}](https://project-autoagento.onrender.com/uploads/{safe_filename})"
     except Exception as e:
         return f"Error generating report: {str(e)}"
 
